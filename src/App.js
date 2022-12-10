@@ -1,12 +1,9 @@
-// src/App.js
-
 // App.js PATCH
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const App = () => {
   const [todo, setTodo] = useState({
-    id: Math.floor(Math.random() * 10000),
     title: "",
   });
   const [todos, setTodos] = useState(null);
@@ -16,26 +13,39 @@ const App = () => {
   const [editTodo, setEditTodo] = useState({
     title: "",
   });
-
+  console.log("변경전 : ", editTodo);
   const fetchTodos = async () => {
-    const { data } = await axios.get("http://localhost:3001/todos");
+    const { data } = await axios.get("http://localhost:3002/todos");
     setTodos(data);
   };
 
   const onSubmitHandler = (todo) => {
-    axios.post("http://localhost:3001/todos", todo);
+    axios.post("http://localhost:3002/todos", todo);
     setTodos([...todos, todo]);
   };
 
   const onClickDeleteButtonHandler = (todoId) => {
-    axios.delete(`http://localhost:3001/todos/${todoId}`);
+    axios.delete(`http://localhost:3002/todos/${todoId}`);
     // setTodos([...todos, todo]); // 삭제하고 리렌더링 안됨..
+    const newTodoList = todos.filter((todo) => todo.id !== todoId);
+    setTodos(newTodoList);
   };
 
   // 수정버튼 이벤트 핸들러 추가 👇
   const onClickEditButtonHandler = (todoId, edit) => {
-    axios.patch(`http://localhost:3001/todos/${todoId}`, edit);
+    axios
+      .patch(`http://localhost:3002/todos/${todoId}`, edit)
+      .then((res) => {
+        console.log(res);
+        fetchTodos();
+        // setTodos();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     // setTodos(todos); // [todos] [...todos, todo], todo 리렌더링 안됨
+
+    console.log("변경 후 : ", edit);
   };
 
   useEffect(() => {
@@ -83,6 +93,7 @@ const App = () => {
             const { value } = ev.target;
             setTodo({
               ...todo,
+              id: Math.floor(Math.random() * 10000), // random값으로 아이디 지정
               title: value,
             });
           }}
